@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import datetime 
 
+## Reads ODs from the 3rd floor plate reader, supports both matrix and list
+## output formats
 
 def read_infinateM200_output(target):
     file = pd.read_excel(target, 0, header=None)
@@ -55,7 +57,14 @@ def read_infinateM200_output(target):
     return plate
 
 
+
+##  Reads the xlsx outputs from tecan sunrise plate readers, see example file
+##  "C:\Users\jbag2\OneDrive - Concordia University - Canada\Dropbox\Lab_Automation\example_file_structures\sunrise_growth_curve.xlsx"
+##  if legth mismatch error increase number of rows skipped, e.g. need to skip
+##  4 rows for example file
+
 def read_sunrise(target, skipbottomrows=-1):
+    
     if target == 'testing':
         target =\
         r"C:\Users\Owner\Concordia\Lab_Automation\example_files\sunrise_growth_curve.xlsx"
@@ -68,6 +77,11 @@ def read_sunrise(target, skipbottomrows=-1):
     curves.columns = np.arange(1, 97)
     return curves
 
+
+
+##  takes output from read_sunrise and applies a rolling function to return 
+##  growth rates across all wells at chosen interval, default is 60 minutes. 
+
 def growth_rate(sunrise, window_size=60):
     _mininsec = 1/60
     _ws = str(window_size)+'min'
@@ -79,6 +93,10 @@ def growth_rate(sunrise, window_size=60):
         return rate
     return(sunrise.rolling(_ws).apply(growth_func))
 
+
+##  mini function for finding plate data from infinite_M200 due to weird 
+##  output file inconsistencies.
+
 def find_plate(dataframe):
     origin = [np.argmax(dataframe[0].str.find('<>')), 0]
     final_col, final_row = find_dimensions(origin, dataframe)
@@ -88,7 +106,8 @@ def find_plate(dataframe):
 
     return plate_df
 
-
+##  same as find_plate but functions across multi sheet excell files
+##
 def find_plates(excel):
     plates = []
     for sheet_name in excel.sheet_names:
@@ -102,6 +121,8 @@ def find_plates(excel):
             pass
     return plates
 
+##  reads an excel file with the same structure as an infinite M200 plate
+##  to get sample names 
 def read_treatment_map(target):
     if target == 'testing':
         target = r'C:\Users\Owner\Concordia\Lab_Automation\example_files\treatment_map.xlsx'
@@ -122,16 +143,13 @@ def read_treatment_map(target):
             for col in treatment_map.columns.values:
 
                 index = (str(row) + str(col))
-
                 try:
                     value = float(treatment_map[col][row])
                 except ValueError:
                     value = treatment_map[col][row]
-
                 treatment_map_dict[counter] = {'Value': value,
                                                'Well': index}
                 counter += 1
-
         treatment_map = pd.DataFrame.from_dict(treatment_map_dict).T
         treatment_map.set_index(treatment_map['Well'], inplace=True)
         treatment_map.drop(['Well'], axis='columns', inplace=True)
@@ -143,7 +161,7 @@ def read_treatment_map(target):
         treatment_map = treatment_map.drop(['Well'], axis=1)
     return treatment_map
 
-
+##
 def matrix_or_list(dataframe):
     if dataframe.shape[1] > 2:
         return 'MATRIX'
@@ -203,6 +221,7 @@ def as_matrix(data, function=False, rows=list('ABCDEFGH'),
         matrix.append(row)
     return matrix
 
+## Converts well numbers to well position names
 def numbers_to_name(numbers):
     if type(numbers) == int:
         row,col = numbers//12, (numbers-1)%12+1
@@ -217,7 +236,7 @@ def numbers_to_name(numbers):
             names.append(row+str(col))
         return names
 
-
+## Converts well position names to numbers
 def names_to_numbers(names):
     if type(names) == str:
         row = ord(names[0].lower())-97
