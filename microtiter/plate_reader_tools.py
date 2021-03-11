@@ -202,48 +202,16 @@ def structured_find_plates(excel):
         
     return plates
 
-
 def read_treatment_map(target):
-    if target == 'testing':
-        target = r'C:\Users\Owner\Concordia\Lab_Automation\example_files\treatment_map.xlsx'
-    file = pd.read_excel(target, 0, header=None, dtype=str)
-    treatment_map = find_plate(file)
-
-    MODE = matrix_or_list(treatment_map)
-
-    print('Mode =', MODE)
-
-    if MODE == 'MATRIX':
-        treatment_map_dict = {}
-        treatment_map.set_index(treatment_map[0], inplace=True)
-        treatment_map.drop(['<>'], axis='rows', inplace=True)
-        treatment_map.drop([0], axis='columns', inplace=True)
-        counter = 0
-        for row in treatment_map.index.values:
-            for col in treatment_map.columns.values:
-
-                index = (str(row) + str(col))
-
-                try:
-                    value = float(treatment_map[col][row])
-                except ValueError:
-                    value = treatment_map[col][row]
-
-                treatment_map_dict[counter] = {'Value': value,
-                                               'Well': index}
-                counter += 1
-
-        treatment_map = pd.DataFrame.from_dict(treatment_map_dict).T
-        treatment_map.set_index(treatment_map['Well'], inplace=True)
-        treatment_map.drop(['Well'], axis='columns', inplace=True)
-
-    if MODE == 'LIST':
-        treatment_map = treatment_map.set_index(treatment_map[0])
-        treatment_map.columns = treatment_map.iloc[0]
-        treatment_map = treatment_map.drop(['Well'])
-        treatment_map = treatment_map.drop(['Well'], axis=1)
-    return treatment_map
-
+    file = pd.read_excel(io=target, header=None, dtype=str)
+    plate = find_plate(file)
+    plate = read_plate(plate)
+    
+    plate_obj = plate_96()
+    for item in plate.iteritems():
+        plate_obj.wells[item[0]] = item[1]
+    
+    return plate_obj
 
 def matrix_or_list(dataframe):
     if dataframe.shape[1] > 2:
@@ -304,3 +272,51 @@ def as_matrix(data, function=False, rows=list('ABCDEFGH'),
                     row.append(well)
         matrix.append(row)
     return matrix
+
+
+
+
+
+
+#OBSOLETE
+def _read_treatment_map(target):
+    if target == 'testing':
+        target = r'C:\Users\Owner\Concordia\Lab_Automation\example_files\treatment_map.xlsx'
+    file = pd.read_excel(target, 0, header=None, dtype=str)
+    treatment_map = find_plate(file)
+
+    MODE = matrix_or_list(treatment_map)
+
+    print('Mode =', MODE)
+
+    if MODE == 'MATRIX':
+        treatment_map_dict = {}
+        treatment_map.set_index(treatment_map[0], inplace=True)
+        treatment_map.drop(['<>'], axis='rows', inplace=True)
+        treatment_map.drop([0], axis='columns', inplace=True)
+        counter = 0
+        for row in treatment_map.index.values:
+            for col in treatment_map.columns.values:
+
+                index = (str(row) + str(col))
+
+                try:
+                    value = float(treatment_map[col][row])
+                except ValueError:
+                    value = treatment_map[col][row]
+
+                treatment_map_dict[counter] = {'Value': value,
+                                               'Well': index}
+                counter += 1
+
+        treatment_map = pd.DataFrame.from_dict(treatment_map_dict).T
+        treatment_map.set_index(treatment_map['Well'], inplace=True)
+        treatment_map.drop(['Well'], axis='columns', inplace=True)
+
+    if MODE == 'LIST':
+        treatment_map = treatment_map.set_index(treatment_map[0])
+        treatment_map.columns = treatment_map.iloc[0]
+        treatment_map = treatment_map.drop(['Well'])
+        treatment_map = treatment_map.drop(['Well'], axis=1)
+    return treatment_map
+

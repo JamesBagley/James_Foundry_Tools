@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-    # -*- coding: utf-8 -*-
-=======
 # -*- coding: utf-8 -*-
->>>>>>> refactor-&-merge
 """
 Created on Tue Feb 18 16:58:48 2020
 
@@ -15,8 +11,8 @@ import flowio
 from pandas import DataFrame, concat
 import numpy as np
 import matplotlib.pyplot as plt
+from math import sqrt, ceil
 
-<<<<<<< HEAD
 def getwell(well, folder):
     if len(well)<3:
         well = well[0]+'0'+well[1]
@@ -24,15 +20,6 @@ def getwell(well, folder):
     
 def getstrain(strain, strain_map):
     S_map =  read_infinateM200_output(strain_map)
-=======
-def getwell(well):
-    if len(well)<3:
-        well = well[0]+'0'+well[1]
-    return 'D:\\Downloads\\ISM 2020-02-14 Ploidy\\'+well+'.fcs'
-    
-def getstrain(strain):
-    S_map =  read_infinateM200_output(r"D:\Downloads\2020-02-04 Strain Map Top45 PLOIDY.xlsx")
->>>>>>> refactor-&-merge
     S_map = dict(zip(S_map.wells.values(), S_map.wells.keys()))
     return(S_map[strain])
     
@@ -43,19 +30,18 @@ def getflowdata(strain):
     return(DataFrame(data=data, columns=columns))
     
     
-<<<<<<< HEAD
-def multistrain(strains, folder, X='FSC-A', Y='FL2-A', xmax=3000000, ymax=30000):
-    fig, axes = plt.subplots(2, 2)
-    plot_loc = {0:[0,0], 1:[0,1], 2:[1,0], 3:[1,1]}
+def multistrain(strains, folder, X='FSC-A', Y='FL2-A', xmax=3000000, ymax=30000, dim=None):
+    if dim:
+        fig, axes = plt.subplots(*dim)
+    else:
+        dim = [ceil(sqrt(len(strains))), ceil(sqrt(len(strains)))]
+        fig, axes = plt.subplots(*dim)
+    
+    plot_loc = dict()
+    for i in range(dim[0]*dim[1]):
+        plot_loc[i] = [i//dim[1], i%dim[1]]
     for i, strain in enumerate(strains):
         data = getflowdata(strain, folder)
-=======
-def multistrain(strains, X='FSC-A', Y='FL2-A', xmax=3000000, ymax=30000):
-    fig, axes = plt.subplots(2, 2)
-    plot_loc = {0:[0,0], 1:[0,1], 2:[1,0], 3:[1,1]}
-    for i, strain in enumerate(strains):
-        data = getflowdata(strain)
->>>>>>> refactor-&-merge
 
         if len(X.split('/'))>1:
             Xs = X.split('/')
@@ -97,13 +83,8 @@ def multistrain(strains, X='FSC-A', Y='FL2-A', xmax=3000000, ymax=30000):
         ax.set_ylabel(Y)
     plt.show()
 
-<<<<<<< HEAD
 def onestrain(strain, folder, X='FSC-A', Y='FL2-A', xmax=3000000, ymax=30000, plot=True):
     data = getflowdata(strain, folder)
-=======
-def onestrain(strain, X='FSC-A', Y='FL2-A', xmax=3000000, ymax=30000, plot=True):
-    data = getflowdata(strain)
->>>>>>> refactor-&-merge
 
     if len(X.split('/'))>1:
         Xs = X.split('/')
