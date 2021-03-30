@@ -246,6 +246,9 @@ def find_dimension(mode, dataframe, origin, previous=None):
             return current[axis]
 
 
+
+#OBSOLETE
+
 def as_matrix(data, function=False, rows=list('ABCDEFGH'),
               columns=list(range(1, 13))):
     '''
@@ -272,11 +275,6 @@ def as_matrix(data, function=False, rows=list('ABCDEFGH'),
                     row.append(well)
         matrix.append(row)
     return matrix
-
-
-
-
-
 
 #OBSOLETE
 def _read_treatment_map(target):

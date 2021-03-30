@@ -43,7 +43,15 @@ def curve_viewer(sheet, context='talk', legend_name='name', names=False):
                      hue = legend_name, aspect=2)
     plot.ax.xaxis.set_major_locator(ticker.MultipleLocator(6))
     return(plot)
+
+def curve_merger(curves, identifiers, identifier_name):
+    out = []
+    for curve, identifier in zip(curves,identifiers):
+        working_curve = curve.assign(temp=identifier)
+        out.append(working_curves.rename(columns={'temp':identifier_name}))
     
+    return pd.concat(out).reset_index(drop=True)
+
 def mu_max(curves, norm_eqs=None, time_range=['2.5 hours', '15 hours'], blank='BLK'):
     if norm_eqs:
         for strain, norm_eq in norm_eqs.items():
@@ -57,7 +65,7 @@ def mu_max(curves, norm_eqs=None, time_range=['2.5 hours', '15 hours'], blank='B
     window_size = 12
     curves.Time = pd.TimedeltaIndex(curves.Time, unit='h').round('T')
     data = curves.set_index(['Time', 'name', 'well']).unstack([1,2]).resample('5T').mean()
-    blank_val = data['OD595']['BLK'].mean()
+    blank_val = data['OD595'][blank].mean()
 
     try:
         blank_val = blank_val.mean()
