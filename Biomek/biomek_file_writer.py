@@ -32,26 +32,28 @@ def dilution(dilution_information,
 
     out_dict = {}
     for name, well in dilution_information.items():
-        if max (well['transfer_volume']/inoculant_vol*intermediate_vol,
+        
+        try:
+            if max (well['transfer_volume']/inoculant_vol*intermediate_vol,
                 well['dilutant_volume']/inoculant_vol*intermediate_vol) <= 200:
-            out_dict[name] = {
-                            'culture_plate': SOURCE_PLATE,
-                            'culture_well': name,
-                            'dilutant_plate': DILUTANT,
-                            'dilutant_well': DILUTANT_WELL,
-                            'destination': DESTINATION_PLATE,
-                            'destination_well': name,
-                            'culture_volume': well['transfer_volume']/inoculant_vol*intermediate_vol,
-                            'dilutant_volume': well['dilutant_volume']/inoculant_vol*intermediate_vol,
-                            'row': name[0],
-                            'column': int(name[1:]),
-                            'platerowcol':SOURCE_PLATE+DESTINATION_PLATE+name[1:]
-                          }
-        else:
-            transfer_num = 0
-            vals = [well['transfer_volume']/inoculant_vol*intermediate_vol,
-                   well['dilutant_volume']/inoculant_vol*intermediate_vol]
-                
+                out_dict[name] = {
+                                'culture_plate': SOURCE_PLATE,
+                                'culture_well': name,
+                                'dilutant_plate': DILUTANT,
+                                'dilutant_well': DILUTANT_WELL,
+                                'destination': DESTINATION_PLATE,
+                                'destination_well': name,
+                                'culture_volume': well['transfer_volume']/inoculant_vol*intermediate_vol,
+                                'dilutant_volume': well['dilutant_volume']/inoculant_vol*intermediate_vol,
+                                'row': name[0],
+                                'column': int(name[1:]),
+                                'platerowcol':SOURCE_PLATE+DESTINATION_PLATE+name[1:]
+                              }
+            else:
+                transfer_num = 0
+                vals = [well['transfer_volume']/inoculant_vol*intermediate_vol,
+                       well['dilutant_volume']/inoculant_vol*intermediate_vol]
+
             while max (vals) > 0:
                 
                 transfer_num += 1
@@ -70,6 +72,23 @@ def dilution(dilution_information,
                 
                 for i, val in enumerate(vals):
                     vals[i] = max(val-200, 0)
+        except ZeroDivisionError:
+            
+            out_dict[name] = {
+                            'culture_plate': SOURCE_PLATE,
+                            'culture_well': name,
+                            'dilutant_plate': DILUTANT,
+                            'dilutant_well': DILUTANT_WELL,
+                            'destination': DESTINATION_PLATE,
+                            'destination_well': name,
+                            'culture_volume': 0,
+                            'dilutant_volume': intermediate_vol,
+                            'row': name[0],
+                            'column': int(name[1:]),
+                            'platerowcol':SOURCE_PLATE+DESTINATION_PLATE+name[1:]
+                          }
+        
+
                 
             
     out_dataframe = pd.DataFrame.from_dict(out_dict, orient='index')
