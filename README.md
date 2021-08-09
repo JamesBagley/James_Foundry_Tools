@@ -5,7 +5,7 @@
 #### main.py
 	Top level interface for running backdilutions on Biomek, Equal_OD_dilutions
 	function takes the output from a plate reader along with a dilution factor,
-	target OD, target volume & other variables as inputs and outputs a csv file
+	target OD, target volume & other variables and outputs a csv file
 	formatted for the biomek's "Transfer from file" step to the "output files"
 	folder.
 	Prints a warning in case of a well's OD being too low and drops them from
